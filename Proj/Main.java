@@ -1,6 +1,60 @@
 package Proj;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+
+
+class Biblioteca{
+    private Arraylist<Livro> livros;
+
+    public Biblioteca{
+        this.livros = ArrayList<>();
+    }
+
+    public void addLivro(Livro livro) {
+        livros.add(livro);
+    }
+}
+
+class Livro{
+    private String titulo;
+    private String autor;
+    private int anoPublicacao;
+    private boolean disponivel;
+
+    public Livro(String titulo, String autor, int anoPublicacao, boolean disponivel) {
+        this.titulo = titulo;
+        this.autor = autor;
+        this.anoPublicacao = anoPublicacao;
+        this.disponivel = disponivel;
+    }
+
+    public void emprestar() {
+        if (disponivel) {
+            disponivel = false;
+        }
+    }
+
+    public void devolver() {
+        if (!disponivel) {
+            disponivel = true;
+        }
+    }
+
+    @Override
+    public String toString() {
+        String status = disponivel ? "Disponível" : "Emprestado";
+        return "Título: " + titulo + ", Autor: " + autor + ", Ano: " + anoPublicacao + ", Status: " + status;
+    }
+
+    public boolean getDisponivel() {
+        return disponivel;
+    }
+
+    public String getTitulo() {
+        return titulo;
+    }
+}
 
 abstract class Pessoa {
     private String nome;
