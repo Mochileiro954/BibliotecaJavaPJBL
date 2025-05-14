@@ -68,10 +68,45 @@ class Cliente extends Pessoa {
             '}';
 }
 }
+
+class Funcionario extends Pessoa {
+    private String cargo;
+    private double salario;
+    
+    public Funcionario(String nome, int cpf, int idade, String sexo, String email, String senha, String cargo, double salario) {
+        super(nome, cpf, idade, sexo, email, senha);
+        this.cargo = cargo;
+        this.salario = salario;
+    }
+
+    public String getCargo() {
+        return cargo;
+    }
+
+    public double getSalario() {
+        return salario;
+    }
+
+    @Override
+    public String toString() {
+        return "Funcionario{" +
+            "nome='" + getNome() + '\'' +
+            ", cpf=" + getCpf() +
+            ", idade=" + getIdade() +
+            ", sexo='" + getSexo() + '\'' +
+            ", email='" + getEmail() + '\'' +
+            ", cargo='" + cargo + '\'' +
+            ", salario=" + salario +
+            '}';
+    }
+}
 public class Main{
     public static void main(String[] args) {
         Cliente c = new Cliente("pedro", 123, 18, "Masculino", "Pedro78446@", "oiteste", 1500.60);
 
         System.out.println(c);
+        Funcionario funcionario = new Funcionario("Maria", 456, 28, "Feminino", "maria@example.com", "senha123", "Gerente", 5000.00);
+        
+        System.out.println(funcionario);
     }
 }
