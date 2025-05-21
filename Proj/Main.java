@@ -1,22 +1,12 @@
-package Proj;
-
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
+// MODELOS
 
-class Biblioteca{
-    private Arraylist<Livro> livros;
-
-    public Biblioteca{
-        this.livros = ArrayList<>();
-    }
-
-    public void addLivro(Livro livro) {
-        livros.add(livro);
-    }
-}
-
-class Livro{
+class Livro {
     private String titulo;
     private String autor;
     private int anoPublicacao;
@@ -30,15 +20,11 @@ class Livro{
     }
 
     public void emprestar() {
-        if (disponivel) {
-            disponivel = false;
-        }
+        if (disponivel) disponivel = false;
     }
 
     public void devolver() {
-        if (!disponivel) {
-            disponivel = true;
-        }
+        if (!disponivel) disponivel = true;
     }
 
     @Override
@@ -73,29 +59,12 @@ abstract class Pessoa {
         this.senha = senha;
     }
 
-    public int getCpf() {
-        return cpf;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public int getIdade() {
-        return idade;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public String getSenha() {
-        return senha;
-    }
-
-    public String getSexo() {
-        return sexo;
-    }
+    public int getCpf() { return cpf; }
+    public String getEmail() { return email; }
+    public int getIdade() { return idade; }
+    public String getNome() { return nome; }
+    public String getSenha() { return senha; }
+    public String getSexo() { return sexo; }
 }
 
 class Cliente extends Pessoa {
@@ -108,25 +77,21 @@ class Cliente extends Pessoa {
         this.criacao = LocalDate.now();
     }
 
-    public LocalDate getCriacao() {
-        return criacao;
-    }
+    public LocalDate getCriacao() { return criacao; }
 
-    public double getSaldo() {
-        return saldo;
-    }
+    public double getSaldo() { return saldo; }
 
     @Override
     public String toString() {
         return "Cliente{" +
-            "nome='" + getNome() + '\'' +
-            ", cpf=" + getCpf() +
-            ", idade=" + getIdade() +
-            ", sexo='" + getSexo() + '\'' +
-            ", email='" + getEmail() + '\'' +
-            ", saldo=" + saldo +
-            ", criacao=" + criacao +
-            '}';
+                "nome='" + getNome() + '\'' +
+                ", cpf=" + getCpf() +
+                ", idade=" + getIdade() +
+                ", sexo='" + getSexo() + '\'' +
+                ", email='" + getEmail() + '\'' +
+                ", saldo=" + saldo +
+                ", criacao=" + criacao +
+                '}';
     }
 }
 
@@ -140,25 +105,21 @@ class Funcionario extends Pessoa {
         this.salario = salario;
     }
 
-    public String getCargo() {
-        return cargo;
-    }
+    public String getCargo() { return cargo; }
 
-    public double getSalario() {
-        return salario;
-    }
+    public double getSalario() { return salario; }
 
     @Override
     public String toString() {
         return "Funcionario{" +
-            "nome='" + getNome() + '\'' +
-            ", cpf=" + getCpf() +
-            ", idade=" + getIdade() +
-            ", sexo='" + getSexo() + '\'' +
-            ", email='" + getEmail() + '\'' +
-            ", cargo='" + cargo + '\'' +
-            ", salario=" + salario +
-            '}';
+                "nome='" + getNome() + '\'' +
+                ", cpf=" + getCpf() +
+                ", idade=" + getIdade() +
+                ", sexo='" + getSexo() + '\'' +
+                ", email='" + getEmail() + '\'' +
+                ", cargo='" + cargo + '\'' +
+                ", salario=" + salario +
+                '}';
     }
 }
 
@@ -179,27 +140,129 @@ class Emprestimo {
         return valor * Math.pow(1 + taxaJuros, prazoMeses);
     }
 
-    public void exibirInfo() {
-        System.out.println("Empréstimo para o cliente: " + cliente.getNome());
-        System.out.println("Valor do empréstimo: R$ " + valor);
-        System.out.println("Taxa de juros: " + (taxaJuros * 100) + "% ao mês");
-        System.out.println("Prazo: " + prazoMeses + " meses");
-        System.out.println("Valor final do empréstimo: R$ " + calcularValorFinal());
+    public String exibirInfo() {
+        return "Empréstimo para o cliente: " + cliente.getNome() + "\n" +
+                "Valor: R$ " + valor + "\n" +
+                "Juros: " + (taxaJuros * 100) + "% ao mês\n" +
+                "Prazo: " + prazoMeses + " meses\n" +
+                "Total a pagar: R$ " + String.format("%.2f", calcularValorFinal()) + "\n";
     }
 }
 
+// GUI
+
 public class Main {
+    private static ArrayList<Cliente> clientes = new ArrayList<>();
+    private static ArrayList<Funcionario> funcionarios = new ArrayList<>();
+    private static JTextArea outputArea;
+
     public static void main(String[] args) {
-        Cliente c = new Cliente("Pedro", 123, 18, "Masculino", "Pedro78446@", "oiteste", 1500.60);
+        JFrame frame = new JFrame("Sistema de Biblioteca - GUI");
+        frame.setSize(600, 500);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        System.out.println(c);
+        JPanel panel = new JPanel(new GridLayout(0, 1));
+        outputArea = new JTextArea(10, 50);
+        outputArea.setEditable(false);
 
-        Funcionario funcionario = new Funcionario("Maria", 456, 28, "Feminino", "maria@example.com", "senha123", "Gerente", 5000.00);
+        JButton btnAddCliente = new JButton("Cadastrar Cliente");
+        JButton btnAddFuncionario = new JButton("Cadastrar Funcionário");
+        JButton btnEmprestimo = new JButton("Fazer Empréstimo");
+        JButton btnMostrarClientes = new JButton("Mostrar Clientes");
 
-        System.out.println(funcionario);
+        btnAddCliente.addActionListener(e -> cadastrarCliente());
+        btnAddFuncionario.addActionListener(e -> cadastrarFuncionario());
+        btnEmprestimo.addActionListener(e -> fazerEmprestimo());
+        btnMostrarClientes.addActionListener(e -> mostrarClientes());
 
-        Emprestimo emprestimo = new Emprestimo(5000.00, 0.03, 12, c);  
-        
-        emprestimo.exibirInfo();
+        panel.add(btnAddCliente);
+        panel.add(btnAddFuncionario);
+        panel.add(btnEmprestimo);
+        panel.add(btnMostrarClientes);
+        panel.add(new JScrollPane(outputArea));
+
+        frame.add(panel);
+        frame.setVisible(true);
+    }
+
+    private static void cadastrarCliente() {
+        try {
+            String nome = JOptionPane.showInputDialog("Nome:");
+            int cpf = Integer.parseInt(JOptionPane.showInputDialog("CPF (números):"));
+            int idade = Integer.parseInt(JOptionPane.showInputDialog("Idade:"));
+            String sexo = JOptionPane.showInputDialog("Sexo:");
+            String email = JOptionPane.showInputDialog("Email:");
+            String senha = JOptionPane.showInputDialog("Senha:");
+            double saldo = Double.parseDouble(JOptionPane.showInputDialog("Saldo:"));
+
+            Cliente c = new Cliente(nome, cpf, idade, sexo, email, senha, saldo);
+            clientes.add(c);
+            outputArea.append("Cliente cadastrado: " + c.getNome() + "\n");
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Erro ao cadastrar cliente.");
+        }
+    }
+
+    private static void cadastrarFuncionario() {
+        try {
+            String nome = JOptionPane.showInputDialog("Nome:");
+            int cpf = Integer.parseInt(JOptionPane.showInputDialog("CPF (números):"));
+            int idade = Integer.parseInt(JOptionPane.showInputDialog("Idade:"));
+            String sexo = JOptionPane.showInputDialog("Sexo:");
+            String email = JOptionPane.showInputDialog("Email:");
+            String senha = JOptionPane.showInputDialog("Senha:");
+            String cargo = JOptionPane.showInputDialog("Cargo:");
+            double salario = Double.parseDouble(JOptionPane.showInputDialog("Salário:"));
+
+            Funcionario f = new Funcionario(nome, cpf, idade, sexo, email, senha, cargo, salario);
+            funcionarios.add(f);
+            outputArea.append("Funcionário cadastrado: " + f.getNome() + "\n");
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Erro ao cadastrar funcionário.");
+        }
+    }
+
+    private static void fazerEmprestimo() {
+        try {
+            if (clientes.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Nenhum cliente cadastrado.");
+                return;
+            }
+
+            String cpfStr = JOptionPane.showInputDialog("CPF do cliente:");
+            int cpfBusca = Integer.parseInt(cpfStr);
+            Cliente cliente = null;
+
+            for (Cliente c : clientes) {
+                if (c.getCpf() == cpfBusca) {
+                    cliente = c;
+                    break;
+                }
+            }
+
+            if (cliente == null) {
+                JOptionPane.showMessageDialog(null, "Cliente não encontrado.");
+                return;
+            }
+
+            double valor = Double.parseDouble(JOptionPane.showInputDialog("Valor do empréstimo:"));
+            double taxa = Double.parseDouble(JOptionPane.showInputDialog("Taxa de juros (ex: 0.03 para 3%):"));
+            int prazo = Integer.parseInt(JOptionPane.showInputDialog("Prazo em meses:"));
+
+            Emprestimo emprestimo = new Emprestimo(valor, taxa, prazo, cliente);
+            outputArea.append(emprestimo.exibirInfo());
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Erro ao fazer empréstimo.");
+        }
+    }
+
+    private static void mostrarClientes() {
+        if (clientes.isEmpty()) {
+            outputArea.append("Nenhum cliente cadastrado.\n");
+            return;
+        }
+        for (Cliente c : clientes) {
+            outputArea.append(c.toString() + "\n");
+        }
     }
 }
