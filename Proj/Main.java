@@ -169,21 +169,37 @@ public class Main {
         JButton btnAddFuncionario = new JButton("Cadastrar Funcionário");
         JButton btnEmprestimo = new JButton("Fazer Empréstimo");
         JButton btnMostrarClientes = new JButton("Mostrar Clientes");
+        JButton btnCarregarClientes = new JButton("Carregar Clientes CSV");
+        JButton btnCarregarFuncionarios = new JButton("Carregar Funcionários CSV");
 
         btnAddCliente.addActionListener(e -> cadastrarCliente());
         btnAddFuncionario.addActionListener(e -> cadastrarFuncionario());
         btnEmprestimo.addActionListener(e -> fazerEmprestimo());
         btnMostrarClientes.addActionListener(e -> mostrarClientes());
 
+        btnCarregarClientes.addActionListener(e -> {
+            String caminho = JOptionPane.showInputDialog("Caminho do arquivo de clientes:");
+            carregarClientesDeArquivo(caminho);
+        });
+
+        btnCarregarFuncionarios.addActionListener(e -> {
+            String caminho = JOptionPane.showInputDialog("Caminho do arquivo de funcionários:");
+            carregarFuncionariosDeArquivo(caminho);
+        });
+
         panel.add(btnAddCliente);
         panel.add(btnAddFuncionario);
         panel.add(btnEmprestimo);
         panel.add(btnMostrarClientes);
+        panel.add(btnCarregarClientes);
+        panel.add(btnCarregarFuncionarios);
         panel.add(new JScrollPane(outputArea));
 
         frame.add(panel);
         frame.setVisible(true);
     }
+
+
 
     private static void cadastrarCliente() {
         try {
@@ -203,6 +219,34 @@ public class Main {
         }
     }
 
+    private static void carregarClientesDeArquivo(String caminhoArquivo) {
+        try {
+            java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(caminhoArquivo));
+            String linha;
+            while ((linha = reader.readLine()) != null) {
+                String[] dados = linha.split(",");
+
+                if (dados.length >= 7) {
+                    String nome = dados[0];
+                    int cpf = Integer.parseInt(dados[1]);
+                    int idade = Integer.parseInt(dados[2]);
+                    String sexo = dados[3];
+                    String email = dados[4];
+                    String senha = dados[5];
+                    double saldo = Double.parseDouble(dados[6]);
+
+                    Cliente c = new Cliente(nome, cpf, idade, sexo, email, senha, saldo);
+                    clientes.add(c);
+                }
+            }
+            reader.close();
+            outputArea.append("Clientes carregados do arquivo!\n");
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Erro ao carregar clientes do arquivo.");
+        }
+    }
+
+
     private static void cadastrarFuncionario() {
         try {
             String nome = JOptionPane.showInputDialog("Nome:");
@@ -221,6 +265,35 @@ public class Main {
             JOptionPane.showMessageDialog(null, "Erro ao cadastrar funcionário.");
         }
     }
+
+    private static void carregarFuncionariosDeArquivo(String caminhoArquivo) {
+        try {
+            java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(caminhoArquivo));
+            String linha;
+            while ((linha = reader.readLine()) != null) {
+                String[] dados = linha.split(",");
+
+                if (dados.length >= 8) {
+                    String nome = dados[0];
+                    int cpf = Integer.parseInt(dados[1]);
+                    int idade = Integer.parseInt(dados[2]);
+                    String sexo = dados[3];
+                    String email = dados[4];
+                    String senha = dados[5];
+                    String cargo = dados[6];
+                    double salario = Double.parseDouble(dados[7]);
+
+                    Funcionario f = new Funcionario(nome, cpf, idade, sexo, email, senha, cargo, salario);
+                    funcionarios.add(f);
+                }
+            }
+            reader.close();
+            outputArea.append("Funcionários carregados do arquivo!\n");
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Erro ao carregar funcionários do arquivo.");
+        }
+    }
+
 
     private static void fazerEmprestimo() {
         try {
