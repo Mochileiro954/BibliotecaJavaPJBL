@@ -1,6 +1,5 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -136,6 +135,10 @@ class Emprestimo {
         this.cliente = cliente;
     }
 
+    public double getValor(){
+        return valor;
+    }
+
     public double calcularValorFinal() {
         return valor * Math.pow(1 + taxaJuros, prazoMeses);
     }
@@ -149,7 +152,14 @@ class Emprestimo {
     }
 }
 
-// GUI
+class SaldoInsuficienteException extends Exception {
+    public SaldoInsuficienteException(String msg) {
+        super(msg);
+    }
+}
+
+
+// Interface
 
 public class Main {
     private static ArrayList<Cliente> clientes = new ArrayList<>();
@@ -246,15 +256,26 @@ public class Main {
             }
 
             double valor = Double.parseDouble(JOptionPane.showInputDialog("Valor do empréstimo:"));
+
+
+            if (cliente.getSaldo() < valor) {
+                throw new SaldoInsuficienteException("Saldo insuficiente para o empréstimo.");
+            }
+
             double taxa = Double.parseDouble(JOptionPane.showInputDialog("Taxa de juros (ex: 0.03 para 3%):"));
             int prazo = Integer.parseInt(JOptionPane.showInputDialog("Prazo em meses:"));
 
             Emprestimo emprestimo = new Emprestimo(valor, taxa, prazo, cliente);
             outputArea.append(emprestimo.exibirInfo());
+
+
+        } catch (SaldoInsuficienteException e) {
+            JOptionPane.showMessageDialog(null, e.getMessage());
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null, "Erro ao fazer empréstimo.");
         }
     }
+
 
     private static void mostrarClientes() {
         if (clientes.isEmpty()) {
