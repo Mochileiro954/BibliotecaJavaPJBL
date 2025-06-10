@@ -1,362 +1,474 @@
 import javax.swing.*;
 import java.awt.*;
-import java.time.LocalDate;
-import java.util.ArrayList;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
-// MODELOS
+abstract class Pessoa {
+    protected String nome;
+    protected int cpf;
+    protected String senha;
+    protected double saldo;
+
+    public Pessoa(String nome, int cpf, String senha, double saldo) {
+        this.nome = nome;
+        this.cpf = cpf;
+        this.senha = senha;
+        this.saldo = saldo;
+    }
+
+    public String getNome() { return nome; }
+    public int getCpf() { return cpf; }
+    public String getSenha() { return senha; }
+    public double getSaldo() { return saldo; }
+    public void adicionarSaldo(double valor) { saldo += valor; }
+    public abstract String getTipo();
+}
+
+class Cliente extends Pessoa {
+    public Cliente(String nome, int cpf, String senha, double saldo) {
+        super(nome, cpf, senha, saldo);
+    }
+    @Override
+    public String getTipo() { return "Cliente"; }
+}
+
+class Funcionario extends Pessoa {
+    public Funcionario(String nome, int cpf, String senha) {
+        super(nome, cpf, senha, 0.0);
+    }
+    @Override
+    public String getTipo() { return "Funcionario"; }
+}
 
 class Livro {
     private String titulo;
     private String autor;
-    private int anoPublicacao;
-    private boolean disponivel;
+    private boolean disponivel = true;
+    private int cpfAlugador = -1;
 
-    public Livro(String titulo, String autor, int anoPublicacao, boolean disponivel) {
+    public Livro(String titulo, String autor) {
         this.titulo = titulo;
         this.autor = autor;
-        this.anoPublicacao = anoPublicacao;
-        this.disponivel = disponivel;
     }
 
-    public void emprestar() {
-        if (disponivel) disponivel = false;
+    public String getTitulo() { return titulo; }
+    public String getAutor() { return autor; }
+    public boolean isDisponivel() { return disponivel; }
+    public int getCpfAlugador() { return cpfAlugador; }
+
+    public void alugar(int cpfCliente) {
+        disponivel = false;
+        cpfAlugador = cpfCliente;
     }
 
     public void devolver() {
-        if (!disponivel) disponivel = true;
+        disponivel = true;
+        cpfAlugador = -1;
     }
 
     @Override
     public String toString() {
-        String status = disponivel ? "Disponível" : "Emprestado";
-        return "Título: " + titulo + ", Autor: " + autor + ", Ano: " + anoPublicacao + ", Status: " + status;
-    }
-
-    public boolean getDisponivel() {
-        return disponivel;
-    }
-
-    public String getTitulo() {
-        return titulo;
+        String status = disponivel ? "Disponível" : "Alugado";
+        return titulo + " - " + autor + " [" + status + "]";
     }
 }
-
-abstract class Pessoa {
-    private String nome;
-    private int cpf;
-    private int idade;
-    private String sexo;
-    private String email;
-    private String senha;
-
-    public Pessoa(String nome, int cpf, int idade, String sexo, String email, String senha) {
-        this.nome = nome;
-        this.cpf = cpf;
-        this.idade = idade;
-        this.sexo = sexo;
-        this.email = email;
-        this.senha = senha;
-    }
-
-    public int getCpf() { return cpf; }
-    public String getEmail() { return email; }
-    public int getIdade() { return idade; }
-    public String getNome() { return nome; }
-    public String getSenha() { return senha; }
-    public String getSexo() { return sexo; }
-}
-
-class Cliente extends Pessoa {
-    private double saldo;
-    private LocalDate criacao;
-
-    public Cliente(String nome, int cpf, int idade, String sexo, String email, String senha, double saldo) {
-        super(nome, cpf, idade, sexo, email, senha);
-        this.saldo = saldo;
-        this.criacao = LocalDate.now();
-    }
-
-    public LocalDate getCriacao() { return criacao; }
-
-    public double getSaldo() { return saldo; }
-
-    @Override
-    public String toString() {
-        return "Cliente{" +
-                "nome='" + getNome() + '\'' +
-                ", cpf=" + getCpf() +
-                ", idade=" + getIdade() +
-                ", sexo='" + getSexo() + '\'' +
-                ", email='" + getEmail() + '\'' +
-                ", saldo=" + saldo +
-                ", criacao=" + criacao +
-                '}';
-    }
-}
-
-class Funcionario extends Pessoa {
-    private String cargo;
-    private double salario;
-
-    public Funcionario(String nome, int cpf, int idade, String sexo, String email, String senha, String cargo, double salario) {
-        super(nome, cpf, idade, sexo, email, senha);
-        this.cargo = cargo;
-        this.salario = salario;
-    }
-
-    public String getCargo() { return cargo; }
-
-    public double getSalario() { return salario; }
-
-    @Override
-    public String toString() {
-        return "Funcionario{" +
-                "nome='" + getNome() + '\'' +
-                ", cpf=" + getCpf() +
-                ", idade=" + getIdade() +
-                ", sexo='" + getSexo() + '\'' +
-                ", email='" + getEmail() + '\'' +
-                ", cargo='" + cargo + '\'' +
-                ", salario=" + salario +
-                '}';
-    }
-}
-
-class Emprestimo {
-    private double valor;
-    private double taxaJuros;
-    private int prazoMeses;
-    private Cliente cliente;
-
-    public Emprestimo(double valor, double taxaJuros, int prazoMeses, Cliente cliente) {
-        this.valor = valor;
-        this.taxaJuros = taxaJuros;
-        this.prazoMeses = prazoMeses;
-        this.cliente = cliente;
-    }
-
-    public double getValor(){
-        return valor;
-    }
-
-    public double calcularValorFinal() {
-        return valor * Math.pow(1 + taxaJuros, prazoMeses);
-    }
-
-    public String exibirInfo() {
-        return "Empréstimo para o cliente: " + cliente.getNome() + "\n" +
-                "Valor: R$ " + valor + "\n" +
-                "Juros: " + (taxaJuros * 100) + "% ao mês\n" +
-                "Prazo: " + prazoMeses + " meses\n" +
-                "Total a pagar: R$ " + String.format("%.2f", calcularValorFinal()) + "\n";
-    }
-}
-
-class SaldoInsuficienteException extends Exception {
-    public SaldoInsuficienteException(String msg) {
-        super(msg);
-    }
-}
-
-
-// Interface
 
 public class Main {
     private static ArrayList<Cliente> clientes = new ArrayList<>();
     private static ArrayList<Funcionario> funcionarios = new ArrayList<>();
-    private static JTextArea outputArea;
+    private static ArrayList<Livro> livros = new ArrayList<>();
+    private static Pessoa usuarioLogado = null;
+    private static final double TAXA_ALUGUEL = 15.0;
 
     public static void main(String[] args) {
-        JFrame frame = new JFrame("Sistema de Biblioteca - GUI");
-        frame.setSize(600, 500);
+        carregarClientes();
+        carregarFuncionarios();
+        carregarLivros();
+        SwingUtilities.invokeLater(Main::telaEscolhaLogin);
+    }
+
+    private static void carregarClientes() {
+        clientes.clear();
+        File file = new File("clientes.csv");
+        if (!file.exists()) return;
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
+            String linha;
+            while ((linha = br.readLine()) != null) {
+                String[] p = linha.split(";", -1);
+                if (p.length == 4) {
+                    clientes.add(new Cliente(p[0], Integer.parseInt(p[1]), p[2], Double.parseDouble(p[3])));
+                }
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Erro ao carregar clientes.");
+        }
+    }
+    private static void salvarClientes() {
+        try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream("clientes.csv"), StandardCharsets.UTF_8))) {
+            for (Cliente c : clientes) {
+                pw.println(c.getNome() + ";" + c.getCpf() + ";" + c.getSenha() + ";" + c.getSaldo());
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Erro ao salvar clientes.");
+        }
+    }
+    private static void carregarFuncionarios() {
+        funcionarios.clear();
+        File file = new File("funcionarios.csv");
+        if (!file.exists()) return;
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
+            String linha;
+            while ((linha = br.readLine()) != null) {
+                String[] p = linha.split(";", -1);
+                if (p.length == 3) {
+                    funcionarios.add(new Funcionario(p[0], Integer.parseInt(p[1]), p[2]));
+                }
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Erro ao carregar funcionários.");
+        }
+    }
+    private static void salvarFuncionarios() {
+        try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream("funcionarios.csv"), StandardCharsets.UTF_8))) {
+            for (Funcionario f : funcionarios) {
+                pw.println(f.getNome() + ";" + f.getCpf() + ";" + f.getSenha());
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Erro ao salvar funcionários.");
+        }
+    }
+    private static void carregarLivros() {
+        livros.clear();
+        File file = new File("livros.csv");
+        if (!file.exists()) return;
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
+            String linha;
+            while ((linha = br.readLine()) != null) {
+                String[] p = linha.split(";", -1);
+                if (p.length >= 2) {
+                    Livro l = new Livro(p[0], p[1]);
+                    if (p.length == 4) {
+                        if (p[2].equals("false")) {
+                            l.alugar(Integer.parseInt(p[3]));
+                        }
+                        if (p[2].equals("true")) {
+                        }
+                    }
+                    livros.add(l);
+                }
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Erro ao carregar livros.");
+        }
+    }
+    private static void salvarLivros() {
+        try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream("livros.csv"), StandardCharsets.UTF_8))) {
+            for (Livro l : livros) {
+                pw.println(l.getTitulo() + ";" + l.getAutor() + ";" + l.isDisponivel() + ";" + l.getCpfAlugador());
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Erro ao salvar livros.");
+        }
+    }
+
+    private static void telaEscolhaLogin() {
+        JFrame frame = new JFrame("Biblioteca - Escolha Login");
+        frame.setSize(300, 150);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
         JPanel panel = new JPanel(new GridLayout(0, 1));
-        outputArea = new JTextArea(10, 50);
-        outputArea.setEditable(false);
+        JButton btnCliente = new JButton("Entrar como Cliente");
+        JButton btnFuncionario = new JButton("Entrar como Funcionário");
+        panel.add(btnCliente);
+        panel.add(btnFuncionario);
 
-        JButton btnAddCliente = new JButton("Cadastrar Cliente");
-        JButton btnAddFuncionario = new JButton("Cadastrar Funcionário");
-        JButton btnEmprestimo = new JButton("Fazer Empréstimo");
-        JButton btnMostrarClientes = new JButton("Mostrar Clientes");
-        JButton btnCarregarClientes = new JButton("Carregar Clientes CSV");
-        JButton btnCarregarFuncionarios = new JButton("Carregar Funcionários CSV");
-
-        btnAddCliente.addActionListener(e -> cadastrarCliente());
-        btnAddFuncionario.addActionListener(e -> cadastrarFuncionario());
-        btnEmprestimo.addActionListener(e -> fazerEmprestimo());
-        btnMostrarClientes.addActionListener(e -> mostrarClientes());
-
-        btnCarregarClientes.addActionListener(e -> {
-            String caminho = JOptionPane.showInputDialog("Caminho do arquivo de clientes:");
-            carregarClientesDeArquivo(caminho);
+        btnCliente.addActionListener(e -> {
+            frame.dispose();
+            telaLoginCliente();
         });
-
-        btnCarregarFuncionarios.addActionListener(e -> {
-            String caminho = JOptionPane.showInputDialog("Caminho do arquivo de funcionários:");
-            carregarFuncionariosDeArquivo(caminho);
+        btnFuncionario.addActionListener(e -> {
+            frame.dispose();
+            telaLoginFuncionario();
         });
-
-        panel.add(btnAddCliente);
-        panel.add(btnAddFuncionario);
-        panel.add(btnEmprestimo);
-        panel.add(btnMostrarClientes);
-        panel.add(btnCarregarClientes);
-        panel.add(btnCarregarFuncionarios);
-        panel.add(new JScrollPane(outputArea));
 
         frame.add(panel);
+        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
 
+    private static void telaLoginCliente() {
+        JFrame frame = new JFrame("Login Cliente");
+        frame.setSize(300, 200);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        JPanel panel = new JPanel(new GridLayout(0, 1));
+        JTextField nomeField = new JTextField();
+        JTextField cpfField = new JTextField();
+        JPasswordField senhaField = new JPasswordField();
+        JButton btnLogin = new JButton("Entrar");
+        JButton btnCadastro = new JButton("Cadastrar");
+        panel.add(new JLabel("Nome:"));
+        panel.add(nomeField);
+        panel.add(new JLabel("CPF:"));
+        panel.add(cpfField);
+        panel.add(new JLabel("Senha:"));
+        panel.add(senhaField);
+        panel.add(btnLogin);
+        panel.add(btnCadastro);
 
-
-    private static void cadastrarCliente() {
-        try {
-            String nome = JOptionPane.showInputDialog("Nome:");
-            int cpf = Integer.parseInt(JOptionPane.showInputDialog("CPF (números):"));
-            int idade = Integer.parseInt(JOptionPane.showInputDialog("Idade:"));
-            String sexo = JOptionPane.showInputDialog("Sexo:");
-            String email = JOptionPane.showInputDialog("Email:");
-            String senha = JOptionPane.showInputDialog("Senha:");
-            double saldo = Double.parseDouble(JOptionPane.showInputDialog("Saldo:"));
-
-            Cliente c = new Cliente(nome, cpf, idade, sexo, email, senha, saldo);
-            clientes.add(c);
-            outputArea.append("Cliente cadastrado: " + c.getNome() + "\n");
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, "Erro ao cadastrar cliente.");
-        }
-    }
-
-    private static void carregarClientesDeArquivo(String caminhoArquivo) {
-        try {
-            java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(caminhoArquivo));
-            String linha;
-            while ((linha = reader.readLine()) != null) {
-                String[] dados = linha.split(",");
-
-                if (dados.length >= 7) {
-                    String nome = dados[0];
-                    int cpf = Integer.parseInt(dados[1]);
-                    int idade = Integer.parseInt(dados[2]);
-                    String sexo = dados[3];
-                    String email = dados[4];
-                    String senha = dados[5];
-                    double saldo = Double.parseDouble(dados[6]);
-
-                    Cliente c = new Cliente(nome, cpf, idade, sexo, email, senha, saldo);
-                    clientes.add(c);
-                }
-            }
-            reader.close();
-            outputArea.append("Clientes carregados do arquivo!\n");
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, "Erro ao carregar clientes do arquivo.");
-        }
-    }
-
-
-    private static void cadastrarFuncionario() {
-        try {
-            String nome = JOptionPane.showInputDialog("Nome:");
-            int cpf = Integer.parseInt(JOptionPane.showInputDialog("CPF (números):"));
-            int idade = Integer.parseInt(JOptionPane.showInputDialog("Idade:"));
-            String sexo = JOptionPane.showInputDialog("Sexo:");
-            String email = JOptionPane.showInputDialog("Email:");
-            String senha = JOptionPane.showInputDialog("Senha:");
-            String cargo = JOptionPane.showInputDialog("Cargo:");
-            double salario = Double.parseDouble(JOptionPane.showInputDialog("Salário:"));
-
-            Funcionario f = new Funcionario(nome, cpf, idade, sexo, email, senha, cargo, salario);
-            funcionarios.add(f);
-            outputArea.append("Funcionário cadastrado: " + f.getNome() + "\n");
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, "Erro ao cadastrar funcionário.");
-        }
-    }
-
-    private static void carregarFuncionariosDeArquivo(String caminhoArquivo) {
-        try {
-            java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(caminhoArquivo));
-            String linha;
-            while ((linha = reader.readLine()) != null) {
-                String[] dados = linha.split(",");
-
-                if (dados.length >= 8) {
-                    String nome = dados[0];
-                    int cpf = Integer.parseInt(dados[1]);
-                    int idade = Integer.parseInt(dados[2]);
-                    String sexo = dados[3];
-                    String email = dados[4];
-                    String senha = dados[5];
-                    String cargo = dados[6];
-                    double salario = Double.parseDouble(dados[7]);
-
-                    Funcionario f = new Funcionario(nome, cpf, idade, sexo, email, senha, cargo, salario);
-                    funcionarios.add(f);
-                }
-            }
-            reader.close();
-            outputArea.append("Funcionários carregados do arquivo!\n");
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, "Erro ao carregar funcionários do arquivo.");
-        }
-    }
-
-
-    private static void fazerEmprestimo() {
-        try {
-            if (clientes.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "Nenhum cliente cadastrado.");
-                return;
-            }
-
-            String cpfStr = JOptionPane.showInputDialog("CPF do cliente:");
-            int cpfBusca = Integer.parseInt(cpfStr);
-            Cliente cliente = null;
-
+        btnLogin.addActionListener(e -> {
+            String nome = nomeField.getText().trim();
+            String senha = new String(senhaField.getPassword());
+            int cpf;
+            try { cpf = Integer.parseInt(cpfField.getText().trim()); } catch (Exception ex) { cpf = -1; }
             for (Cliente c : clientes) {
-                if (c.getCpf() == cpfBusca) {
-                    cliente = c;
-                    break;
+                if (c.getNome().equals(nome) && c.getSenha().equals(senha) && c.getCpf() == cpf) {
+                    usuarioLogado = c;
+                    frame.dispose();
+                    telaPrincipalCliente();
+                    return;
                 }
             }
+            JOptionPane.showMessageDialog(frame, "Nome, CPF ou senha inválidos.");
+        });
 
-            if (cliente == null) {
-                JOptionPane.showMessageDialog(null, "Cliente não encontrado.");
+        btnCadastro.addActionListener(e -> {
+            String nome = nomeField.getText().trim();
+            String senha = new String(senhaField.getPassword());
+            int cpf;
+            try { cpf = Integer.parseInt(cpfField.getText().trim()); } catch (Exception ex) { cpf = -1; }
+            if (nome.isEmpty() || senha.isEmpty() || cpf == -1) {
+                JOptionPane.showMessageDialog(frame, "Preencha todos os campos corretamente.");
                 return;
             }
-
-            double valor = Double.parseDouble(JOptionPane.showInputDialog("Valor do empréstimo:"));
-
-            if (cliente.getSaldo() < valor) {
-                throw new SaldoInsuficienteException("Saldo insuficiente para o empréstimo.");
+            for (Cliente c : clientes) {
+                if (c.getCpf() == cpf) {
+                    JOptionPane.showMessageDialog(frame, "CPF já cadastrado.");
+                    return;
+                }
             }
+            clientes.add(new Cliente(nome, cpf, senha, 0.0));
+            salvarClientes();
+            JOptionPane.showMessageDialog(frame, "Cadastro realizado! Faça login.");
+        });
 
-            double taxa = Double.parseDouble(JOptionPane.showInputDialog("Taxa de juros (ex: 0.03 para 3%):"));
-            int prazo = Integer.parseInt(JOptionPane.showInputDialog("Prazo em meses:"));
-
-            Emprestimo emprestimo = new Emprestimo(valor, taxa, prazo, cliente);
-            outputArea.append(emprestimo.exibirInfo());
-            
-
-        } catch (SaldoInsuficienteException e) {
-            JOptionPane.showMessageDialog(null, e.getMessage());
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, "Erro ao fazer empréstimo.");
-        }
+        frame.add(panel);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
     }
 
+    private static void telaLoginFuncionario() {
+        JFrame frame = new JFrame("Login Funcionário");
+        frame.setSize(300, 200);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        JPanel panel = new JPanel(new GridLayout(0, 1));
+        JTextField nomeField = new JTextField();
+        JTextField cpfField = new JTextField();
+        JPasswordField senhaField = new JPasswordField();
+        JButton btnLogin = new JButton("Entrar");
+        JButton btnCadastro = new JButton("Cadastrar");
+        panel.add(new JLabel("Nome:"));
+        panel.add(nomeField);
+        panel.add(new JLabel("CPF:"));
+        panel.add(cpfField);
+        panel.add(new JLabel("Senha:"));
+        panel.add(senhaField);
+        panel.add(btnLogin);
+        panel.add(btnCadastro);
 
+        btnLogin.addActionListener(e -> {
+            String nome = nomeField.getText().trim();
+            String senha = new String(senhaField.getPassword());
+            int cpf;
+            try { cpf = Integer.parseInt(cpfField.getText().trim()); } catch (Exception ex) { cpf = -1; }
+            for (Funcionario f : funcionarios) {
+                if (f.getNome().equals(nome) && f.getSenha().equals(senha) && f.getCpf() == cpf) {
+                    usuarioLogado = f;
+                    frame.dispose();
+                    telaPrincipalFuncionario();
+                    return;
+                }
+            }
+            JOptionPane.showMessageDialog(frame, "Nome, CPF ou senha inválidos.");
+        });
 
-    private static void mostrarClientes() {
-        if (clientes.isEmpty()) {
-            outputArea.append("Nenhum cliente cadastrado.\n");
-            return;
-        }
-        for (Cliente c : clientes) {
-            outputArea.append(c.toString() + "\n");
-        }
+        btnCadastro.addActionListener(e -> {
+            String nome = nomeField.getText().trim();
+            String senha = new String(senhaField.getPassword());
+            int cpf;
+            try { cpf = Integer.parseInt(cpfField.getText().trim()); } catch (Exception ex) { cpf = -1; }
+            if (nome.isEmpty() || senha.isEmpty() || cpf == -1) {
+                JOptionPane.showMessageDialog(frame, "Preencha todos os campos corretamente.");
+                return;
+            }
+            for (Funcionario f : funcionarios) {
+                if (f.getCpf() == cpf) {
+                    JOptionPane.showMessageDialog(frame, "CPF já cadastrado.");
+                    return;
+                }
+            }
+            funcionarios.add(new Funcionario(nome, cpf, senha));
+            salvarFuncionarios();
+            JOptionPane.showMessageDialog(frame, "Cadastro realizado! Faça login.");
+        });
+
+        frame.add(panel);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+
+    private static void telaPrincipalCliente() {
+        Cliente cliente = (Cliente) usuarioLogado;
+        JFrame frame = new JFrame("Biblioteca - Cliente: " + cliente.getNome());
+        frame.setSize(500, 400);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        DefaultListModel<Livro> livrosModel = new DefaultListModel<>();
+        for (Livro l : livros) livrosModel.addElement(l);
+        JList<Livro> listaLivros = new JList<>(livrosModel);
+
+        JLabel saldoLabel = new JLabel("Saldo: R$" + String.format("%.2f", cliente.getSaldo()));
+
+        JButton btnAlugar = new JButton("Alugar Livro (R$15)");
+        JButton btnDevolver = new JButton("Devolver Livro");
+        JButton btnSaldo = new JButton("Adicionar Saldo");
+        JButton btnLogout = new JButton("Logout");
+
+        btnAlugar.addActionListener(e -> {
+            Livro livro = listaLivros.getSelectedValue();
+            if (livro == null) {
+                JOptionPane.showMessageDialog(frame, "Selecione um livro.");
+                return;
+            }
+            if (!livro.isDisponivel()) {
+                JOptionPane.showMessageDialog(frame, "Livro já está alugado.");
+                return;
+            }
+            if (cliente.getSaldo() < TAXA_ALUGUEL) {
+                JOptionPane.showMessageDialog(frame, "Saldo insuficiente.");
+                return;
+            }
+            livro.alugar(cliente.getCpf());
+            cliente.adicionarSaldo(-TAXA_ALUGUEL);
+            salvarLivros();
+            salvarClientes();
+            livrosModel.setElementAt(livro, listaLivros.getSelectedIndex());
+            saldoLabel.setText("Saldo: R$" + String.format("%.2f", cliente.getSaldo()));
+            JOptionPane.showMessageDialog(frame, "Livro alugado com sucesso!");
+        });
+
+        btnDevolver.addActionListener(e -> {
+            Livro livro = listaLivros.getSelectedValue();
+            if (livro == null) {
+                JOptionPane.showMessageDialog(frame, "Selecione um livro.");
+                return;
+            }
+            if (livro.isDisponivel() || livro.getCpfAlugador() != cliente.getCpf()) {
+                JOptionPane.showMessageDialog(frame, "Você não alugou este livro.");
+                return;
+            }
+            livro.devolver();
+            salvarLivros();
+            livrosModel.setElementAt(livro, listaLivros.getSelectedIndex());
+            JOptionPane.showMessageDialog(frame, "Livro devolvido!");
+        });
+
+        btnSaldo.addActionListener(e -> {
+            String valorStr = JOptionPane.showInputDialog(frame, "Valor para adicionar:");
+            try {
+                double valor = Double.parseDouble(valorStr);
+                if (valor <= 0) throw new Exception();
+                cliente.adicionarSaldo(valor);
+                salvarClientes();
+                saldoLabel.setText("Saldo: R$" + String.format("%.2f", cliente.getSaldo()));
+                JOptionPane.showMessageDialog(frame, "Saldo adicionado! Saldo atual: R$" + cliente.getSaldo());
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, "Valor inválido.");
+            }
+        });
+
+        btnLogout.addActionListener(e -> {
+            usuarioLogado = null;
+            frame.dispose();
+            telaEscolhaLogin();
+        });
+
+        JPanel botoes = new JPanel();
+        botoes.add(btnAlugar);
+        botoes.add(btnDevolver);
+        botoes.add(btnSaldo);
+        botoes.add(btnLogout);
+
+        JPanel topo = new JPanel(new BorderLayout());
+        topo.add(saldoLabel, BorderLayout.WEST);
+
+        frame.add(topo, BorderLayout.NORTH);
+        frame.add(new JScrollPane(listaLivros), BorderLayout.CENTER);
+        frame.add(botoes, BorderLayout.SOUTH);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+
+    private static void telaPrincipalFuncionario() {
+        JFrame frame = new JFrame("Biblioteca - Funcionário: " + usuarioLogado.getNome());
+        frame.setSize(500, 400);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        DefaultListModel<Livro> livrosModel = new DefaultListModel<>();
+        for (Livro l : livros) livrosModel.addElement(l);
+        JList<Livro> listaLivros = new JList<>(livrosModel);
+
+        JButton btnAdicionarLivro = new JButton("Cadastrar Livro");
+        JButton btnVerClientes = new JButton("Ver Clientes");
+        JButton btnLogout = new JButton("Logout");
+
+        btnAdicionarLivro.addActionListener(e -> {
+            JTextField tituloField = new JTextField();
+            JTextField autorField = new JTextField();
+            JPanel panel = new JPanel(new GridLayout(0, 1));
+            panel.add(new JLabel("Título:"));
+            panel.add(tituloField);
+            panel.add(new JLabel("Autor:"));
+            panel.add(autorField);
+            int result = JOptionPane.showConfirmDialog(frame, panel, "Cadastrar Livro", JOptionPane.OK_CANCEL_OPTION);
+            if (result == JOptionPane.OK_OPTION) {
+                String titulo = tituloField.getText();
+                String autor = autorField.getText();
+                if (titulo.isEmpty() || autor.isEmpty()) {
+                    JOptionPane.showMessageDialog(frame, "Preencha todos os campos.");
+                    return;
+                }
+                Livro novo = new Livro(titulo, autor);
+                livros.add(novo);
+                livrosModel.addElement(novo);
+                salvarLivros();
+                JOptionPane.showMessageDialog(frame, "Livro cadastrado!");
+            }
+        });
+
+        btnVerClientes.addActionListener(e -> {
+            StringBuilder sb = new StringBuilder();
+            for (Cliente c : clientes) {
+                sb.append("Nome: ").append(c.getNome())
+                  .append(" | CPF: ").append(c.getCpf())
+                  .append(" | Saldo: R$").append(c.getSaldo()).append("\n");
+            }
+            JOptionPane.showMessageDialog(frame, sb.length() == 0 ? "Nenhum cliente cadastrado." : sb.toString());
+        });
+
+        btnLogout.addActionListener(e -> {
+            usuarioLogado = null;
+            frame.dispose();
+            telaEscolhaLogin();
+        });
+
+        JPanel botoes = new JPanel();
+        botoes.add(btnAdicionarLivro);
+        botoes.add(btnVerClientes);
+        botoes.add(btnLogout);
+
+        frame.add(new JScrollPane(listaLivros), BorderLayout.CENTER);
+        frame.add(botoes, BorderLayout.SOUTH);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
     }
 }
