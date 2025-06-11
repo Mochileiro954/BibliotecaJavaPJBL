@@ -1,3 +1,4 @@
+// Importações
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
@@ -24,6 +25,49 @@ abstract class Pessoa {
     public void adicionarSaldo(double valor) { saldo += valor; }
     public abstract String getTipo();
 }
+
+class UsuarioInvalidoException extends Exception {
+    public UsuarioInvalidoException() {
+        super("Nome, CPF ou senha inválidos.");
+    }
+}
+
+class DadosInvalidosException extends Exception {
+    public DadosInvalidosException() {
+        super("Preencha todos os campos corretamente.");
+    }
+}
+
+class CpfJaCadastradoException extends Exception {
+    public CpfJaCadastradoException() {
+        super("CPF já cadastrado.");
+    }
+}
+
+class LivroIndisponivelException extends Exception {
+    public LivroIndisponivelException() {
+        super("Livro já está alugado.");
+    }
+}
+
+class SaldoInsuficienteException extends Exception {
+    public SaldoInsuficienteException() {
+        super("Saldo insuficiente.");
+    }
+}
+
+class LivroNaoAlugadoPorClienteException extends Exception {
+    public LivroNaoAlugadoPorClienteException() {
+        super("Você não alugou este livro.");
+    }
+}
+
+class ValorInvalidoException extends Exception {
+    public ValorInvalidoException() {
+        super("Valor inválido.");
+    }
+}
+
 
 class Cliente extends Pessoa {
     public Cliente(String nome, int cpf, String senha, double saldo) {
@@ -104,6 +148,7 @@ public class Main {
             JOptionPane.showMessageDialog(null, "Erro ao carregar clientes.");
         }
     }
+
     private static void salvarClientes() {
         try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream("clientes.csv"), StandardCharsets.UTF_8))) {
             for (Cliente c : clientes) {
@@ -113,6 +158,7 @@ public class Main {
             JOptionPane.showMessageDialog(null, "Erro ao salvar clientes.");
         }
     }
+
     private static void carregarFuncionarios() {
         funcionarios.clear();
         File file = new File("funcionarios.csv");
@@ -129,6 +175,7 @@ public class Main {
             JOptionPane.showMessageDialog(null, "Erro ao carregar funcionários.");
         }
     }
+
     private static void salvarFuncionarios() {
         try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream("funcionarios.csv"), StandardCharsets.UTF_8))) {
             for (Funcionario f : funcionarios) {
@@ -138,6 +185,7 @@ public class Main {
             JOptionPane.showMessageDialog(null, "Erro ao salvar funcionários.");
         }
     }
+
     private static void carregarLivros() {
         livros.clear();
         File file = new File("livros.csv");
@@ -148,12 +196,8 @@ public class Main {
                 String[] p = linha.split(";", -1);
                 if (p.length >= 2) {
                     Livro l = new Livro(p[0], p[1]);
-                    if (p.length == 4) {
-                        if (p[2].equals("false")) {
-                            l.alugar(Integer.parseInt(p[3]));
-                        }
-                        if (p[2].equals("true")) {
-                        }
+                    if (p.length == 4 && p[2].equals("false")) {
+                        l.alugar(Integer.parseInt(p[3]));
                     }
                     livros.add(l);
                 }
@@ -162,6 +206,7 @@ public class Main {
             JOptionPane.showMessageDialog(null, "Erro ao carregar livros.");
         }
     }
+
     private static void salvarLivros() {
         try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream("livros.csv"), StandardCharsets.UTF_8))) {
             for (Livro l : livros) {
@@ -206,7 +251,7 @@ public class Main {
         JPasswordField senhaField = new JPasswordField();
         JButton btnLogin = new JButton("Entrar");
         JButton btnCadastro = new JButton("Cadastrar");
-        JButton btnVoltar = new JButton("Voltar"); 
+        JButton btnVoltar = new JButton("Voltar");
         panel.add(new JLabel("Nome:"));
         panel.add(nomeField);
         panel.add(new JLabel("CPF:"));
@@ -215,47 +260,47 @@ public class Main {
         panel.add(senhaField);
         panel.add(btnLogin);
         panel.add(btnCadastro);
-        panel.add(btnVoltar); 
+        panel.add(btnVoltar);
 
         btnLogin.addActionListener(e -> {
-            String nome = nomeField.getText().trim();
-            String senha = new String(senhaField.getPassword());
-            int cpf;
-            try { cpf = Integer.parseInt(cpfField.getText().trim()); } catch (Exception ex) { cpf = -1; }
-            for (Cliente c : clientes) {
-                if (c.getNome().equals(nome) && c.getSenha().equals(senha) && c.getCpf() == cpf) {
-                    usuarioLogado = c;
-                    frame.dispose();
-                    telaPrincipalCliente();
-                    return;
+            try {
+                String nome = nomeField.getText().trim();
+                String senha = new String(senhaField.getPassword());
+                int cpf = Integer.parseInt(cpfField.getText().trim());
+                for (Cliente c : clientes) {
+                    if (c.getNome().equals(nome) && c.getSenha().equals(senha) && c.getCpf() == cpf) {
+                        usuarioLogado = c;
+                        frame.dispose();
+                        telaPrincipalCliente();
+                        return;
+                    }
                 }
+                throw new UsuarioInvalidoException();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, ex.getMessage());
             }
-            JOptionPane.showMessageDialog(frame, "Nome, CPF ou senha inválidos.");
         });
 
         btnCadastro.addActionListener(e -> {
-            String nome = nomeField.getText().trim();
-            String senha = new String(senhaField.getPassword());
-            int cpf;
-            try { cpf = Integer.parseInt(cpfField.getText().trim()); } catch (Exception ex) { cpf = -1; }
-            if (nome.isEmpty() || senha.isEmpty() || cpf == -1) {
-                JOptionPane.showMessageDialog(frame, "Preencha todos os campos corretamente.");
-                return;
-            }
-            for (Cliente c : clientes) {
-                if (c.getCpf() == cpf) {
-                    JOptionPane.showMessageDialog(frame, "CPF já cadastrado.");
-                    return;
+            try {
+                String nome = nomeField.getText().trim();
+                String senha = new String(senhaField.getPassword());
+                int cpf = Integer.parseInt(cpfField.getText().trim());
+                if (nome.isEmpty() || senha.isEmpty()) throw new DadosInvalidosException();
+                for (Cliente c : clientes) {
+                    if (c.getCpf() == cpf) throw new CpfJaCadastradoException();
                 }
+                clientes.add(new Cliente(nome, cpf, senha, 0.0));
+                salvarClientes();
+                JOptionPane.showMessageDialog(frame, "Cadastro realizado! Faça login.");
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, ex.getMessage());
             }
-            clientes.add(new Cliente(nome, cpf, senha, 0.0));
-            salvarClientes();
-            JOptionPane.showMessageDialog(frame, "Cadastro realizado! Faça login.");
         });
 
         btnVoltar.addActionListener(e -> {
             frame.dispose();
-            telaEscolhaLogin(); 
+            telaEscolhaLogin();
         });
 
         frame.add(panel);
@@ -273,7 +318,7 @@ public class Main {
         JPasswordField senhaField = new JPasswordField();
         JButton btnLogin = new JButton("Entrar");
         JButton btnCadastro = new JButton("Cadastrar");
-        JButton btnVoltar = new JButton("Voltar"); 
+        JButton btnVoltar = new JButton("Voltar");
         panel.add(new JLabel("Nome:"));
         panel.add(nomeField);
         panel.add(new JLabel("CPF:"));
@@ -282,47 +327,47 @@ public class Main {
         panel.add(senhaField);
         panel.add(btnLogin);
         panel.add(btnCadastro);
-        panel.add(btnVoltar); 
+        panel.add(btnVoltar);
 
         btnLogin.addActionListener(e -> {
-            String nome = nomeField.getText().trim();
-            String senha = new String(senhaField.getPassword());
-            int cpf;
-            try { cpf = Integer.parseInt(cpfField.getText().trim()); } catch (Exception ex) { cpf = -1; }
-            for (Funcionario f : funcionarios) {
-                if (f.getNome().equals(nome) && f.getSenha().equals(senha) && f.getCpf() == cpf) {
-                    usuarioLogado = f;
-                    frame.dispose();
-                    telaPrincipalFuncionario();
-                    return;
+            try {
+                String nome = nomeField.getText().trim();
+                String senha = new String(senhaField.getPassword());
+                int cpf = Integer.parseInt(cpfField.getText().trim());
+                for (Funcionario f : funcionarios) {
+                    if (f.getNome().equals(nome) && f.getSenha().equals(senha) && f.getCpf() == cpf) {
+                        usuarioLogado = f;
+                        frame.dispose();
+                        telaPrincipalFuncionario();
+                        return;
+                    }
                 }
+                throw new UsuarioInvalidoException();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, ex.getMessage());
             }
-            JOptionPane.showMessageDialog(frame, "Nome, CPF ou senha inválidos.");
         });
 
         btnCadastro.addActionListener(e -> {
-            String nome = nomeField.getText().trim();
-            String senha = new String(senhaField.getPassword());
-            int cpf;
-            try { cpf = Integer.parseInt(cpfField.getText().trim()); } catch (Exception ex) { cpf = -1; }
-            if (nome.isEmpty() || senha.isEmpty() || cpf == -1) {
-                JOptionPane.showMessageDialog(frame, "Preencha todos os campos corretamente.");
-                return;
-            }
-            for (Funcionario f : funcionarios) {
-                if (f.getCpf() == cpf) {
-                    JOptionPane.showMessageDialog(frame, "CPF já cadastrado.");
-                    return;
+            try {
+                String nome = nomeField.getText().trim();
+                String senha = new String(senhaField.getPassword());
+                int cpf = Integer.parseInt(cpfField.getText().trim());
+                if (nome.isEmpty() || senha.isEmpty()) throw new DadosInvalidosException();
+                for (Funcionario f : funcionarios) {
+                    if (f.getCpf() == cpf) throw new CpfJaCadastradoException();
                 }
+                funcionarios.add(new Funcionario(nome, cpf, senha));
+                salvarFuncionarios();
+                JOptionPane.showMessageDialog(frame, "Cadastro realizado! Faça login.");
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, ex.getMessage());
             }
-            funcionarios.add(new Funcionario(nome, cpf, senha));
-            salvarFuncionarios();
-            JOptionPane.showMessageDialog(frame, "Cadastro realizado! Faça login.");
         });
 
         btnVoltar.addActionListener(e -> {
             frame.dispose();
-            telaEscolhaLogin(); 
+            telaEscolhaLogin();
         });
 
         frame.add(panel);
@@ -346,68 +391,54 @@ public class Main {
         JButton btnDevolver = new JButton("Devolver Livro");
         JButton btnSaldo = new JButton("Adicionar Saldo");
         JButton btnLogout = new JButton("Logout");
-        JButton btnVoltar = new JButton("Voltar"); 
 
         btnAlugar.addActionListener(e -> {
-            Livro livro = listaLivros.getSelectedValue();
-            if (livro == null) {
-                JOptionPane.showMessageDialog(frame, "Selecione um livro.");
-                return;
+            try {
+                Livro livro = listaLivros.getSelectedValue();
+                if (livro == null) throw new Exception("Selecione um livro.");
+                if (!livro.isDisponivel()) throw new LivroIndisponivelException();
+                if (cliente.getSaldo() < TAXA_ALUGUEL) throw new SaldoInsuficienteException();
+                livro.alugar(cliente.getCpf());
+                cliente.adicionarSaldo(-TAXA_ALUGUEL);
+                salvarLivros();
+                salvarClientes();
+                livrosModel.setElementAt(livro, listaLivros.getSelectedIndex());
+                saldoLabel.setText("Saldo: R$" + String.format("%.2f", cliente.getSaldo()));
+                JOptionPane.showMessageDialog(frame, "Livro alugado com sucesso!");
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, ex.getMessage());
             }
-            if (!livro.isDisponivel()) {
-                JOptionPane.showMessageDialog(frame, "Livro já está alugado.");
-                return;
-            }
-            if (cliente.getSaldo() < TAXA_ALUGUEL) {
-                JOptionPane.showMessageDialog(frame, "Saldo insuficiente.");
-                return;
-            }
-            livro.alugar(cliente.getCpf());
-            cliente.adicionarSaldo(-TAXA_ALUGUEL);
-            salvarLivros();
-            salvarClientes();
-            livrosModel.setElementAt(livro, listaLivros.getSelectedIndex());
-            saldoLabel.setText("Saldo: R$" + String.format("%.2f", cliente.getSaldo()));
-            JOptionPane.showMessageDialog(frame, "Livro alugado com sucesso!");
         });
 
         btnDevolver.addActionListener(e -> {
-            Livro livro = listaLivros.getSelectedValue();
-            if (livro == null) {
-                JOptionPane.showMessageDialog(frame, "Selecione um livro.");
-                return;
+            try {
+                Livro livro = listaLivros.getSelectedValue();
+                if (livro == null) throw new Exception("Selecione um livro.");
+                if (livro.isDisponivel() || livro.getCpfAlugador() != cliente.getCpf()) throw new LivroNaoAlugadoPorClienteException();
+                livro.devolver();
+                salvarLivros();
+                livrosModel.setElementAt(livro, listaLivros.getSelectedIndex());
+                JOptionPane.showMessageDialog(frame, "Livro devolvido!");
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, ex.getMessage());
             }
-            if (livro.isDisponivel() || livro.getCpfAlugador() != cliente.getCpf()) {
-                JOptionPane.showMessageDialog(frame, "Você não alugou este livro.");
-                return;
-            }
-            livro.devolver();
-            salvarLivros();
-            livrosModel.setElementAt(livro, listaLivros.getSelectedIndex());
-            JOptionPane.showMessageDialog(frame, "Livro devolvido!");
         });
 
         btnSaldo.addActionListener(e -> {
-            String valorStr = JOptionPane.showInputDialog(frame, "Valor para adicionar:");
             try {
+                String valorStr = JOptionPane.showInputDialog(frame, "Valor para adicionar:");
                 double valor = Double.parseDouble(valorStr);
-                if (valor <= 0) throw new Exception();
+                if (valor <= 0) throw new ValorInvalidoException();
                 cliente.adicionarSaldo(valor);
                 salvarClientes();
                 saldoLabel.setText("Saldo: R$" + String.format("%.2f", cliente.getSaldo()));
                 JOptionPane.showMessageDialog(frame, "Saldo adicionado! Saldo atual: R$" + cliente.getSaldo());
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, "Valor inválido.");
+                JOptionPane.showMessageDialog(frame, ex.getMessage());
             }
         });
 
         btnLogout.addActionListener(e -> {
-            usuarioLogado = null;
-            frame.dispose();
-            telaEscolhaLogin();
-        });
-
-        btnVoltar.addActionListener(e -> {
             usuarioLogado = null;
             frame.dispose();
             telaEscolhaLogin();
@@ -470,8 +501,8 @@ public class Main {
             StringBuilder sb = new StringBuilder();
             for (Cliente c : clientes) {
                 sb.append("Nome: ").append(c.getNome())
-                  .append(" | CPF: ").append(c.getCpf())
-                  .append(" | Saldo: R$").append(c.getSaldo()).append("\n");
+                        .append(" | CPF: ").append(c.getCpf())
+                        .append(" | Saldo: R$").append(c.getSaldo()).append("\n");
             }
             JOptionPane.showMessageDialog(frame, sb.length() == 0 ? "Nenhum cliente cadastrado." : sb.toString());
         });
