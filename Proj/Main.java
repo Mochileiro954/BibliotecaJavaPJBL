@@ -206,6 +206,7 @@ public class Main {
         JPasswordField senhaField = new JPasswordField();
         JButton btnLogin = new JButton("Entrar");
         JButton btnCadastro = new JButton("Cadastrar");
+        JButton btnVoltar = new JButton("Voltar"); 
         panel.add(new JLabel("Nome:"));
         panel.add(nomeField);
         panel.add(new JLabel("CPF:"));
@@ -214,6 +215,7 @@ public class Main {
         panel.add(senhaField);
         panel.add(btnLogin);
         panel.add(btnCadastro);
+        panel.add(btnVoltar); 
 
         btnLogin.addActionListener(e -> {
             String nome = nomeField.getText().trim();
@@ -251,6 +253,11 @@ public class Main {
             JOptionPane.showMessageDialog(frame, "Cadastro realizado! Faça login.");
         });
 
+        btnVoltar.addActionListener(e -> {
+            frame.dispose();
+            telaEscolhaLogin(); 
+        });
+
         frame.add(panel);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
@@ -266,6 +273,7 @@ public class Main {
         JPasswordField senhaField = new JPasswordField();
         JButton btnLogin = new JButton("Entrar");
         JButton btnCadastro = new JButton("Cadastrar");
+        JButton btnVoltar = new JButton("Voltar"); 
         panel.add(new JLabel("Nome:"));
         panel.add(nomeField);
         panel.add(new JLabel("CPF:"));
@@ -274,6 +282,7 @@ public class Main {
         panel.add(senhaField);
         panel.add(btnLogin);
         panel.add(btnCadastro);
+        panel.add(btnVoltar); 
 
         btnLogin.addActionListener(e -> {
             String nome = nomeField.getText().trim();
@@ -311,6 +320,11 @@ public class Main {
             JOptionPane.showMessageDialog(frame, "Cadastro realizado! Faça login.");
         });
 
+        btnVoltar.addActionListener(e -> {
+            frame.dispose();
+            telaEscolhaLogin(); 
+        });
+
         frame.add(panel);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
@@ -332,6 +346,7 @@ public class Main {
         JButton btnDevolver = new JButton("Devolver Livro");
         JButton btnSaldo = new JButton("Adicionar Saldo");
         JButton btnLogout = new JButton("Logout");
+        JButton btnVoltar = new JButton("Voltar"); 
 
         btnAlugar.addActionListener(e -> {
             Livro livro = listaLivros.getSelectedValue();
@@ -387,6 +402,12 @@ public class Main {
         });
 
         btnLogout.addActionListener(e -> {
+            usuarioLogado = null;
+            frame.dispose();
+            telaEscolhaLogin();
+        });
+
+        btnVoltar.addActionListener(e -> {
             usuarioLogado = null;
             frame.dispose();
             telaEscolhaLogin();
