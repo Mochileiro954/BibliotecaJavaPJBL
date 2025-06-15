@@ -1,11 +1,11 @@
 // Importações
-import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.*;
+import javax.swing.*;
 
 class HashUtil {
     public static String hash(String input) {
@@ -23,8 +23,8 @@ class HashUtil {
     }
 }
 
-
-abstract class Pessoa {
+abstract class Pessoa implements Serializable {
+    private static final long serialVersionUID = 1L;
     protected String nome;
     protected String cpf;
     protected String senha;
@@ -87,8 +87,8 @@ class ValorInvalidoException extends Exception {
     }
 }
 
-
 class Cliente extends Pessoa {
+    private static final long serialVersionUID = 1L;
     public Cliente(String nome, String cpf, String senha, double saldo) {
         super(nome, cpf, senha, saldo);
     }
@@ -97,6 +97,7 @@ class Cliente extends Pessoa {
 }
 
 class Funcionario extends Pessoa {
+    private static final long serialVersionUID = 1L;
     public Funcionario(String nome, String cpf, String senha) {
         super(nome, cpf, senha, 0.0);
     }
@@ -104,7 +105,8 @@ class Funcionario extends Pessoa {
     public String getTipo() { return "Funcionario"; }
 }
 
-class Livro {
+class Livro implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String titulo;
     private String autor;
     private boolean disponivel = true;
@@ -151,62 +153,47 @@ public class Main {
         SwingUtilities.invokeLater(Main::telaEscolhaLogin);
     }
 
+
     private static void carregarClientes() {
         clientes.clear();
-        File file = new File("clientes.csv");
+        File file = new File("clientes.cleitin");
         if (!file.exists()) return;
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
-            String linha;
-            while ((linha = br.readLine()) != null) {
-                String[] p = linha.split(";", -1);
-                if (p.length == 4) {
-                    clientes.add(new Cliente(p[0], p[1], p[2], Double.parseDouble(p[3])));
-
-                }
-            }
-        } catch (IOException e) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
+            clientes = (ArrayList<Cliente>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
             JOptionPane.showMessageDialog(null, "Erro ao carregar clientes.");
         }
     }
 
     private static void salvarClientes() {
-        try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream("clientes.csv"), StandardCharsets.UTF_8))) {
-            for (Cliente c : clientes) {
-                pw.println(c.getNome() + ";" + c.getCpf() + ";" + c.getSenha() + ";" + c.getSaldo());
-            }
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("clientes.cleitin"))) {
+            oos.writeObject(clientes);
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, "Erro ao salvar clientes.");
         }
     }
 
+    
     private static void carregarFuncionarios() {
         funcionarios.clear();
-        File file = new File("funcionarios.csv");
+        File file = new File("funcionarios.cleitin");
         if (!file.exists()) return;
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
-            String linha;
-            while ((linha = br.readLine()) != null) {
-                String[] p = linha.split(";", -1);
-                if (p.length == 3) {
-                    funcionarios.add(new Funcionario(p[0], p[1], p[2]));
-
-                }
-            }
-        } catch (IOException e) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
+            funcionarios = (ArrayList<Funcionario>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
             JOptionPane.showMessageDialog(null, "Erro ao carregar funcionários.");
         }
     }
 
     private static void salvarFuncionarios() {
-        try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream("funcionarios.csv"), StandardCharsets.UTF_8))) {
-            for (Funcionario f : funcionarios) {
-                pw.println(f.getNome() + ";" + f.getCpf() + ";" + f.getSenha());
-            }
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("funcionarios.cleitin"))) {
+            oos.writeObject(funcionarios);
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, "Erro ao salvar funcionários.");
         }
     }
 
+   
     private static void carregarLivros() {
         livros.clear();
         File file = new File("livros.csv");
@@ -443,7 +430,7 @@ public class Main {
             try {
                 Livro livro = listaLivros.getSelectedValue();
                 if (livro == null) throw new Exception("Selecione um livro.");
-                if (livro.isDisponivel() || livro.getCpfAlugador() != cliente.getCpf()) throw new LivroNaoAlugadoPorClienteException();
+                if (livro.isDisponivel() || !livro.getCpfAlugador().equals(cliente.getCpf())) throw new LivroNaoAlugadoPorClienteException();
                 livro.devolver();
                 salvarLivros();
                 livrosModel.setElementAt(livro, listaLivros.getSelectedIndex());
