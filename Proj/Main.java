@@ -7,11 +7,11 @@ import java.util.*;
 
 abstract class Pessoa {
     protected String nome;
-    protected int cpf;
+    protected String cpf;
     protected String senha;
     protected double saldo;
 
-    public Pessoa(String nome, int cpf, String senha, double saldo) {
+    public Pessoa(String nome, String cpf, String senha, double saldo) {
         this.nome = nome;
         this.cpf = cpf;
         this.senha = senha;
@@ -19,7 +19,7 @@ abstract class Pessoa {
     }
 
     public String getNome() { return nome; }
-    public int getCpf() { return cpf; }
+    public String getCpf() { return cpf; }
     public String getSenha() { return senha; }
     public double getSaldo() { return saldo; }
     public void adicionarSaldo(double valor) { saldo += valor; }
@@ -70,7 +70,7 @@ class ValorInvalidoException extends Exception {
 
 
 class Cliente extends Pessoa {
-    public Cliente(String nome, int cpf, String senha, double saldo) {
+    public Cliente(String nome, String cpf, String senha, double saldo) {
         super(nome, cpf, senha, saldo);
     }
     @Override
@@ -78,7 +78,7 @@ class Cliente extends Pessoa {
 }
 
 class Funcionario extends Pessoa {
-    public Funcionario(String nome, int cpf, String senha) {
+    public Funcionario(String nome, String cpf, String senha) {
         super(nome, cpf, senha, 0.0);
     }
     @Override
@@ -89,7 +89,7 @@ class Livro {
     private String titulo;
     private String autor;
     private boolean disponivel = true;
-    private int cpfAlugador = -1;
+    private String cpfAlugador = "-1";
 
     public Livro(String titulo, String autor) {
         this.titulo = titulo;
@@ -99,16 +99,16 @@ class Livro {
     public String getTitulo() { return titulo; }
     public String getAutor() { return autor; }
     public boolean isDisponivel() { return disponivel; }
-    public int getCpfAlugador() { return cpfAlugador; }
+    public String getCpfAlugador() { return cpfAlugador; }
 
-    public void alugar(int cpfCliente) {
+    public void alugar(String cpfCliente) {
         disponivel = false;
         cpfAlugador = cpfCliente;
     }
 
     public void devolver() {
         disponivel = true;
-        cpfAlugador = -1;
+        cpfAlugador = "-1";
     }
 
     @Override
@@ -141,7 +141,8 @@ public class Main {
             while ((linha = br.readLine()) != null) {
                 String[] p = linha.split(";", -1);
                 if (p.length == 4) {
-                    clientes.add(new Cliente(p[0], Integer.parseInt(p[1]), p[2], Double.parseDouble(p[3])));
+                    clientes.add(new Cliente(p[0], p[1], p[2], Double.parseDouble(p[3])));
+
                 }
             }
         } catch (IOException e) {
@@ -168,7 +169,8 @@ public class Main {
             while ((linha = br.readLine()) != null) {
                 String[] p = linha.split(";", -1);
                 if (p.length == 3) {
-                    funcionarios.add(new Funcionario(p[0], Integer.parseInt(p[1]), p[2]));
+                    funcionarios.add(new Funcionario(p[0], p[1], p[2]));
+
                 }
             }
         } catch (IOException e) {
@@ -197,7 +199,7 @@ public class Main {
                 if (p.length >= 2) {
                     Livro l = new Livro(p[0], p[1]);
                     if (p.length == 4 && p[2].equals("false")) {
-                        l.alugar(Integer.parseInt(p[3]));
+                        l.alugar(p[3]);
                     }
                     livros.add(l);
                 }
@@ -266,9 +268,9 @@ public class Main {
             try {
                 String nome = nomeField.getText().trim();
                 String senha = new String(senhaField.getPassword());
-                int cpf = Integer.parseInt(cpfField.getText().trim());
+                String cpf = cpfField.getText().trim();
                 for (Cliente c : clientes) {
-                    if (c.getNome().equals(nome) && c.getSenha().equals(senha) && c.getCpf() == cpf) {
+                    if (c.getNome().equals(nome) && c.getSenha().equals(senha) && c.getCpf().equals(cpf)) {
                         usuarioLogado = c;
                         frame.dispose();
                         telaPrincipalCliente();
@@ -285,10 +287,10 @@ public class Main {
             try {
                 String nome = nomeField.getText().trim();
                 String senha = new String(senhaField.getPassword());
-                int cpf = Integer.parseInt(cpfField.getText().trim());
+                String cpf = cpfField.getText().trim();
                 if (nome.isEmpty() || senha.isEmpty()) throw new DadosInvalidosException();
                 for (Cliente c : clientes) {
-                    if (c.getCpf() == cpf) throw new CpfJaCadastradoException();
+                    if (c.getCpf().equals(cpf)) throw new CpfJaCadastradoException();
                 }
                 clientes.add(new Cliente(nome, cpf, senha, 0.0));
                 salvarClientes();
@@ -333,9 +335,9 @@ public class Main {
             try {
                 String nome = nomeField.getText().trim();
                 String senha = new String(senhaField.getPassword());
-                int cpf = Integer.parseInt(cpfField.getText().trim());
+                String cpf = cpfField.getText().trim();
                 for (Funcionario f : funcionarios) {
-                    if (f.getNome().equals(nome) && f.getSenha().equals(senha) && f.getCpf() == cpf) {
+                    if (f.getNome().equals(nome) && f.getSenha().equals(senha) && f.getCpf().equals(cpf)) {
                         usuarioLogado = f;
                         frame.dispose();
                         telaPrincipalFuncionario();
@@ -352,10 +354,10 @@ public class Main {
             try {
                 String nome = nomeField.getText().trim();
                 String senha = new String(senhaField.getPassword());
-                int cpf = Integer.parseInt(cpfField.getText().trim());
+                String cpf = cpfField.getText().trim();
                 if (nome.isEmpty() || senha.isEmpty()) throw new DadosInvalidosException();
                 for (Funcionario f : funcionarios) {
-                    if (f.getCpf() == cpf) throw new CpfJaCadastradoException();
+                    if (f.getCpf().equals(cpf)) throw new CpfJaCadastradoException();
                 }
                 funcionarios.add(new Funcionario(nome, cpf, senha));
                 salvarFuncionarios();
