@@ -4,6 +4,25 @@ import java.awt.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+class HashUtil {
+    public static String hash(String input) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hashedBytes = md.digest(input.getBytes());
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hashedBytes) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Erro ao criar hash", e);
+        }
+    }
+}
+
 
 abstract class Pessoa {
     protected String nome;
@@ -13,8 +32,8 @@ abstract class Pessoa {
 
     public Pessoa(String nome, String cpf, String senha, double saldo) {
         this.nome = nome;
-        this.cpf = cpf;
-        this.senha = senha;
+        this.cpf = HashUtil.hash(cpf);
+        this.senha = HashUtil.hash(senha);
         this.saldo = saldo;
     }
 
@@ -269,8 +288,12 @@ public class Main {
                 String nome = nomeField.getText().trim();
                 String senha = new String(senhaField.getPassword());
                 String cpf = cpfField.getText().trim();
+
+                String senhaHash = HashUtil.hash(senha);
+                String cpfHash= HashUtil.hash(cpf);
+
                 for (Cliente c : clientes) {
-                    if (c.getNome().equals(nome) && c.getSenha().equals(senha) && c.getCpf().equals(cpf)) {
+                    if (c.getNome().equals(nome) && c.getSenha().equals(senhaHash) && c.getCpf().equals(cpfHash)) {
                         usuarioLogado = c;
                         frame.dispose();
                         telaPrincipalCliente();
@@ -289,8 +312,9 @@ public class Main {
                 String senha = new String(senhaField.getPassword());
                 String cpf = cpfField.getText().trim();
                 if (nome.isEmpty() || senha.isEmpty()) throw new DadosInvalidosException();
+                String cpfHash = HashUtil.hash(cpf);
                 for (Cliente c : clientes) {
-                    if (c.getCpf().equals(cpf)) throw new CpfJaCadastradoException();
+                    if (c.getCpf().equals(cpfHash)) throw new CpfJaCadastradoException();
                 }
                 clientes.add(new Cliente(nome, cpf, senha, 0.0));
                 salvarClientes();
@@ -336,8 +360,10 @@ public class Main {
                 String nome = nomeField.getText().trim();
                 String senha = new String(senhaField.getPassword());
                 String cpf = cpfField.getText().trim();
+                String senhaHash = HashUtil.hash(senha);
+                String cpfHash = HashUtil.hash(cpf);
                 for (Funcionario f : funcionarios) {
-                    if (f.getNome().equals(nome) && f.getSenha().equals(senha) && f.getCpf().equals(cpf)) {
+                    if (f.getNome().equals(nome) && f.getSenha().equals(senhaHash) && f.getCpf().equals(cpfHash)) {
                         usuarioLogado = f;
                         frame.dispose();
                         telaPrincipalFuncionario();
@@ -355,9 +381,10 @@ public class Main {
                 String nome = nomeField.getText().trim();
                 String senha = new String(senhaField.getPassword());
                 String cpf = cpfField.getText().trim();
+                String cpfHash = HashUtil.hash(cpf);
                 if (nome.isEmpty() || senha.isEmpty()) throw new DadosInvalidosException();
                 for (Funcionario f : funcionarios) {
-                    if (f.getCpf().equals(cpf)) throw new CpfJaCadastradoException();
+                    if (f.getCpf().equals(cpfHash)) throw new CpfJaCadastradoException();
                 }
                 funcionarios.add(new Funcionario(nome, cpf, senha));
                 salvarFuncionarios();
