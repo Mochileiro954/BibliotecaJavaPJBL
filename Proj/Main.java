@@ -334,6 +334,10 @@ public class Main {
                 String senha = new String(senhaField.getPassword());
                 String cpf = cpfField.getText().trim();
 
+                if (nome.length() < 3) {
+                    throw new DadosInvalidosException();
+                }
+
                 if (!validarSenha(senha)) {
                     throw new DadosInvalidosException();
                 }
@@ -352,6 +356,8 @@ public class Main {
                 clientes.add(new Cliente(nome, cpf, senha, 0.0));
                 salvarClientes();
                 JOptionPane.showMessageDialog(frame, "Cadastro realizado! Faça login.");
+            } catch (DadosInvalidosException ex) {
+                JOptionPane.showMessageDialog(frame, "Nome deve ter pelo menos 3 letras e todos os campos devem ser preenchidos corretamente.");
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(frame, ex.getMessage());
             }
