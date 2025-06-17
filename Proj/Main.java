@@ -29,16 +29,19 @@ abstract class Pessoa implements Serializable {
     protected String cpf;
     protected String senha;
     protected double saldo;
+    protected String cpfOriginal;
 
     public Pessoa(String nome, String cpf, String senha, double saldo) {
         this.nome = nome;
         this.cpf = HashUtil.hash(cpf);
         this.senha = HashUtil.hash(senha);
         this.saldo = saldo;
+        this.cpfOriginal = cpf;
     }
 
     public String getNome() { return nome; }
     public String getCpf() { return cpf; }
+    public String getCpfOriginal() { return cpfOriginal; }
     public String getSenha() { return senha; }
     public double getSaldo() { return saldo; }
     public void adicionarSaldo(double valor) { saldo += valor; }
@@ -310,7 +313,7 @@ public class Main {
                 if (!validarCpf(cpf)) {
                     throw new UsuarioInvalidoException();
                 }
-
+                
                 String senhaHash = HashUtil.hash(senha);
                 String cpfHash = HashUtil.hash(cpf);
 
@@ -597,8 +600,7 @@ public class Main {
         btnVerClientes.addActionListener(e -> {
             StringBuilder sb = new StringBuilder();
             for (Cliente c : clientes) {
-                sb.append("Nome: ").append(c.getNome())
-                        .append(" | CPF: ").append(c.getCpf())
+                sb.append("Nome: ").append(c.getNome())                        .append(" | CPF: ").append(c.getCpfOriginal())
                         .append(" | Saldo: R$").append(c.getSaldo()).append("\n");
             }
             JOptionPane.showMessageDialog(frame, sb.length() == 0 ? "Nenhum cliente cadastrado." : sb.toString());
