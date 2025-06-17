@@ -87,6 +87,12 @@ class ValorInvalidoException extends Exception {
     }
 }
 
+class CampoVazioException extends Exception {
+    public CampoVazioException() {
+        super("Operação cancelada ou campo vazio.");
+    }
+}
+
 class Cliente extends Pessoa {
     private static final long serialVersionUID = 1L;
     public Cliente(String nome, String cpf, String senha, double saldo) {
@@ -139,7 +145,7 @@ class Livro implements Serializable {
     }
 }
 
-class Main {
+public class Main {
     private static ArrayList<Cliente> clientes = new ArrayList<>();
     private static ArrayList<Funcionario> funcionarios = new ArrayList<>();
     private static ArrayList<Livro> livros = new ArrayList<>();
@@ -497,12 +503,19 @@ class Main {
         btnSaldo.addActionListener(e -> {
             try {
                 String valorStr = JOptionPane.showInputDialog(frame, "Valor para adicionar:");
-                double valor = Double.parseDouble(valorStr);
+                if (valorStr == null || valorStr.trim().isEmpty()) {
+                    throw new CampoVazioException();
+                }
+                double valor = Double.parseDouble(valorStr.trim());
                 if (valor <= 0) throw new ValorInvalidoException();
                 cliente.adicionarSaldo(valor);
                 salvarClientes();
                 saldoLabel.setText("Saldo: R$" + String.format("%.2f", cliente.getSaldo()));
                 JOptionPane.showMessageDialog(frame, "Saldo adicionado! Saldo atual: R$" + cliente.getSaldo());
+            } catch (CampoVazioException ex) {
+                JOptionPane.showMessageDialog(frame, ex.getMessage());
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(frame, "Digite apenas números válidos para o saldo!");
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(frame, ex.getMessage());
             }
