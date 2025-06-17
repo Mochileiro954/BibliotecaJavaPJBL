@@ -167,6 +167,13 @@ class Main {
         return true;
     }
 
+    public static boolean validarSenha(String senha) {
+        String regex = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*(),.?\":{}|<>]).{8,}$";
+
+        return senha.matches(regex);
+    }
+
+
     private static void carregarClientes() {
         clientes.clear();
         File file = new File("clientes.cleitin");
@@ -289,8 +296,12 @@ class Main {
                 String senha = new String(senhaField.getPassword());
                 String cpf = cpfField.getText().trim();
 
+                if (!validarSenha(senha)) {
+                    throw new UsuarioInvalidoException();
+                }
+
                 if (!validarCpf(cpf)) {
-                    throw new UsuarioInvalidoException(); 
+                    throw new UsuarioInvalidoException();
                 }
 
                 String senhaHash = HashUtil.hash(senha);
@@ -317,8 +328,12 @@ class Main {
                 String senha = new String(senhaField.getPassword());
                 String cpf = cpfField.getText().trim();
 
+                if (!validarSenha(senha)) {
+                    throw new DadosInvalidosException();
+                }
+
                 if (!validarCpf(cpf)) {
-                    throw new DadosInvalidosException(); 
+                    throw new DadosInvalidosException();
                 }
 
                 if (nome.isEmpty() || senha.isEmpty()) throw new DadosInvalidosException();
@@ -334,6 +349,7 @@ class Main {
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(frame, ex.getMessage());
             }
+
         });
 
 
@@ -394,11 +410,22 @@ class Main {
                 String nome = nomeField.getText().trim();
                 String senha = new String(senhaField.getPassword());
                 String cpf = cpfField.getText().trim();
-                String cpfHash = HashUtil.hash(cpf);
+
+                if (!validarSenha(senha)) {
+                    throw new DadosInvalidosException();
+                }
+
+                if (!validarCpf(cpf)) {
+                    throw new DadosInvalidosException();
+                }
+
                 if (nome.isEmpty() || senha.isEmpty()) throw new DadosInvalidosException();
+
+                String cpfHash = HashUtil.hash(cpf);
                 for (Funcionario f : funcionarios) {
                     if (f.getCpf().equals(cpfHash)) throw new CpfJaCadastradoException();
                 }
+
                 funcionarios.add(new Funcionario(nome, cpf, senha));
                 salvarFuncionarios();
                 JOptionPane.showMessageDialog(frame, "Cadastro realizado! Faça login.");
@@ -406,6 +433,7 @@ class Main {
                 JOptionPane.showMessageDialog(frame, ex.getMessage());
             }
         });
+
 
         btnVoltar.addActionListener(e -> {
             frame.dispose();
