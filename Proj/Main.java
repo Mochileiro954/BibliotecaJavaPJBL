@@ -172,6 +172,7 @@ public class Main {
 
         return true;
     }
+   
 
     public static boolean validarSenha(String senha) {
         String regex = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*(),.?\":{}|<>]).{8,}$";
@@ -345,6 +346,7 @@ public class Main {
                 if (!validarCpf(cpf)) {
                     throw new DadosInvalidosException();
                 }
+                 
 
                 if (nome.isEmpty() || senha.isEmpty()) throw new DadosInvalidosException();
 
@@ -426,11 +428,15 @@ public class Main {
                 if (!validarSenha(senha)) {
                     throw new DadosInvalidosException();
                 }
+                
+                if (nome.length() < 3) {
+                    throw new DadosInvalidosException();
+                }
 
                 if (!validarCpf(cpf)) {
                     throw new DadosInvalidosException();
                 }
-
+                
                 if (nome.isEmpty() || senha.isEmpty()) throw new DadosInvalidosException();
 
                 String cpfHash = HashUtil.hash(cpf);
@@ -441,6 +447,8 @@ public class Main {
                 funcionarios.add(new Funcionario(nome, cpf, senha));
                 salvarFuncionarios();
                 JOptionPane.showMessageDialog(frame, "Cadastro realizado! Faça login.");
+            } catch (DadosInvalidosException ex) {
+                JOptionPane.showMessageDialog(frame, "Nome deve ter pelo menos 3 letras e todos os campos devem ser preenchidos corretamente.");
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(frame, ex.getMessage());
             }
