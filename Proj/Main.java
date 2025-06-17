@@ -470,7 +470,7 @@ public class Main {
 
     private static void telaPrincipalCliente() {
         Cliente cliente = (Cliente) usuarioLogado;
-        JFrame frame = new JFrame("Biblioteca - Cliente: " + cliente.getNome());
+        JFrame frame = new JFrame("Biblioteca - " + cliente.getTipo() + ": " + cliente.getNome());
         frame.setSize(500, 400);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -561,7 +561,7 @@ public class Main {
     }
 
     private static void telaPrincipalFuncionario() {
-        JFrame frame = new JFrame("Biblioteca - Funcionário: " + usuarioLogado.getNome());
+        JFrame frame = new JFrame("Biblioteca - " + usuarioLogado.getTipo() + ": " + usuarioLogado.getNome());
         frame.setSize(500, 400);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
