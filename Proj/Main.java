@@ -139,7 +139,7 @@ class Livro implements Serializable {
     }
 }
 
-public class Main {
+class Main {
     private static ArrayList<Cliente> clientes = new ArrayList<>();
     private static ArrayList<Funcionario> funcionarios = new ArrayList<>();
     private static ArrayList<Livro> livros = new ArrayList<>();
@@ -153,6 +153,19 @@ public class Main {
         SwingUtilities.invokeLater(Main::telaEscolhaLogin);
     }
 
+    public static boolean validarCpf(String cpf) {
+        if (cpf == null || cpf.length() != 11) {
+            return false;
+        }
+
+        for (int i = 0; i < cpf.length(); i++) {
+            if (!Character.isDigit(cpf.charAt(i))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     private static void carregarClientes() {
         clientes.clear();
@@ -173,7 +186,7 @@ public class Main {
         }
     }
 
-    
+
     private static void carregarFuncionarios() {
         funcionarios.clear();
         File file = new File("funcionarios.cleitin");
@@ -193,7 +206,7 @@ public class Main {
         }
     }
 
-   
+
     private static void carregarLivros() {
         livros.clear();
         File file = new File("livros.csv");
@@ -276,8 +289,12 @@ public class Main {
                 String senha = new String(senhaField.getPassword());
                 String cpf = cpfField.getText().trim();
 
+                if (!validarCpf(cpf)) {
+                    throw new UsuarioInvalidoException(); 
+                }
+
                 String senhaHash = HashUtil.hash(senha);
-                String cpfHash= HashUtil.hash(cpf);
+                String cpfHash = HashUtil.hash(cpf);
 
                 for (Cliente c : clientes) {
                     if (c.getNome().equals(nome) && c.getSenha().equals(senhaHash) && c.getCpf().equals(cpfHash)) {
@@ -293,16 +310,24 @@ public class Main {
             }
         });
 
+
         btnCadastro.addActionListener(e -> {
             try {
                 String nome = nomeField.getText().trim();
                 String senha = new String(senhaField.getPassword());
                 String cpf = cpfField.getText().trim();
+
+                if (!validarCpf(cpf)) {
+                    throw new DadosInvalidosException(); 
+                }
+
                 if (nome.isEmpty() || senha.isEmpty()) throw new DadosInvalidosException();
+
                 String cpfHash = HashUtil.hash(cpf);
                 for (Cliente c : clientes) {
                     if (c.getCpf().equals(cpfHash)) throw new CpfJaCadastradoException();
                 }
+
                 clientes.add(new Cliente(nome, cpf, senha, 0.0));
                 salvarClientes();
                 JOptionPane.showMessageDialog(frame, "Cadastro realizado! Faça login.");
@@ -310,6 +335,7 @@ public class Main {
                 JOptionPane.showMessageDialog(frame, ex.getMessage());
             }
         });
+
 
         btnVoltar.addActionListener(e -> {
             frame.dispose();
